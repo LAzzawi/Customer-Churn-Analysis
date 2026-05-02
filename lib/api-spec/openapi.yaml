@@ -1,0 +1,309 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Telecom Customer Churn Analysis API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: churn
+    description: Churn analysis operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /churn/overview:
+    get:
+      operationId: getChurnOverview
+      tags: [churn]
+      summary: Get overall churn statistics
+      responses:
+        "200":
+          description: Churn overview statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChurnOverview"
+
+  /churn/distribution:
+    get:
+      operationId: getChurnDistribution
+      tags: [churn]
+      summary: Get churn distribution across segments
+      responses:
+        "200":
+          description: Churn distribution data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChurnDistribution"
+
+  /churn/features:
+    get:
+      operationId: getChurnFeatures
+      tags: [churn]
+      summary: Get churn rate by feature values
+      responses:
+        "200":
+          description: Feature-level churn rates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeatureChurnRate"
+
+  /churn/model:
+    get:
+      operationId: getChurnModel
+      tags: [churn]
+      summary: Get logistic regression model evaluation metrics
+      responses:
+        "200":
+          description: Model performance metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelEvaluation"
+
+  /churn/feature-importance:
+    get:
+      operationId: getFeatureImportance
+      tags: [churn]
+      summary: Get logistic regression feature coefficients
+      responses:
+        "200":
+          description: Feature importance coefficients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeatureImportance"
+
+  /churn/recommendations:
+    get:
+      operationId: getChurnRecommendations
+      tags: [churn]
+      summary: Get actionable business recommendations
+      responses:
+        "200":
+          description: Business recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recommendation"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ChurnOverview:
+      type: object
+      properties:
+        totalCustomers:
+          type: integer
+        churnedCount:
+          type: integer
+        retainedCount:
+          type: integer
+        churnRate:
+          type: number
+        avgTenureMonths:
+          type: number
+        avgMonthlyCharges:
+          type: number
+        avgTotalCharges:
+          type: number
+        seniorCitizenChurnRate:
+          type: number
+        nonSeniorChurnRate:
+          type: number
+      required:
+        - totalCustomers
+        - churnedCount
+        - retainedCount
+        - churnRate
+        - avgTenureMonths
+        - avgMonthlyCharges
+        - avgTotalCharges
+        - seniorCitizenChurnRate
+        - nonSeniorChurnRate
+
+    ChurnDistribution:
+      type: object
+      properties:
+        byContract:
+          type: array
+          items:
+            $ref: "#/components/schemas/SegmentChurn"
+        byInternetService:
+          type: array
+          items:
+            $ref: "#/components/schemas/SegmentChurn"
+        byPaymentMethod:
+          type: array
+          items:
+            $ref: "#/components/schemas/SegmentChurn"
+        byTenureGroup:
+          type: array
+          items:
+            $ref: "#/components/schemas/SegmentChurn"
+        bySeniorCitizen:
+          type: array
+          items:
+            $ref: "#/components/schemas/SegmentChurn"
+        byTechSupport:
+          type: array
+          items:
+            $ref: "#/components/schemas/SegmentChurn"
+      required:
+        - byContract
+        - byInternetService
+        - byPaymentMethod
+        - byTenureGroup
+        - bySeniorCitizen
+        - byTechSupport
+
+    SegmentChurn:
+      type: object
+      properties:
+        segment:
+          type: string
+        churned:
+          type: integer
+        retained:
+          type: integer
+        total:
+          type: integer
+        churnRate:
+          type: number
+      required:
+        - segment
+        - churned
+        - retained
+        - total
+        - churnRate
+
+    FeatureChurnRate:
+      type: object
+      properties:
+        feature:
+          type: string
+        value:
+          type: string
+        churnRate:
+          type: number
+        count:
+          type: integer
+      required:
+        - feature
+        - value
+        - churnRate
+        - count
+
+    ConfusionMatrix:
+      type: object
+      properties:
+        truePositive:
+          type: integer
+        trueNegative:
+          type: integer
+        falsePositive:
+          type: integer
+        falseNegative:
+          type: integer
+      required:
+        - truePositive
+        - trueNegative
+        - falsePositive
+        - falseNegative
+
+    ModelEvaluation:
+      type: object
+      properties:
+        accuracy:
+          type: number
+        precision:
+          type: number
+        recall:
+          type: number
+        f1Score:
+          type: number
+        auc:
+          type: number
+        confusionMatrix:
+          $ref: "#/components/schemas/ConfusionMatrix"
+        trainSize:
+          type: integer
+        testSize:
+          type: integer
+      required:
+        - accuracy
+        - precision
+        - recall
+        - f1Score
+        - auc
+        - confusionMatrix
+        - trainSize
+        - testSize
+
+    FeatureImportance:
+      type: object
+      properties:
+        feature:
+          type: string
+        coefficient:
+          type: number
+        absCoefficient:
+          type: number
+        direction:
+          type: string
+      required:
+        - feature
+        - coefficient
+        - absCoefficient
+        - direction
+
+    Recommendation:
+      type: object
+      properties:
+        priority:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        impact:
+          type: string
+        action:
+          type: string
+      required:
+        - priority
+        - title
+        - description
+        - impact
+        - action
